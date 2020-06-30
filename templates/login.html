@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    {% load static %}
+    <div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h1 class="text-center">登入</h1>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="usernmae">用户名</label>
+                <input type="text" name="username" id="username" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" name="password" id="password" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="">验证码</label>
+                <div class="row">
+                    <div class="col-md-2">
+                        <input type="text" name="code" id="id_code" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <img src="/get_code/" alt="" width="200" height="35" id="id_img">
+                    </div>
+                </div>
+            </div>
+            <span style="color: red" id="error"></span>
+            <br>
+            <div class="text-center"><input type="button" class="btn btn-success" value="登陆" id="id_commit"></div>
+        </div>
+    </div>
+</div>
+    <script>
+        $('#id_img').click(function () {
+            let oldVal = $(this).attr('src');
+            $(this).attr('src',oldVal +='?')
+        })
+        $('#id_commit').click(function () {
+            $.ajax({
+                url:'',
+                type:'post',
+                data:{
+                    'username':$('#username').val(),
+                    'password':$('#password').val(),
+                    'code':$('#id_code').val(),
+                    'csrfmiddlewaretoken':'{{ csrf_token }}'
+                },
+                success:function (args) {
+                    if(args.code == 1000){
+                        window.location.href = args.url;
+                    }else{
+                        $('#error').text(args.msg);
+                    }
+                }
+            })
+        })
+    </script>
+</body>
+</html>

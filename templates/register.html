@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <h1 class="text-center">注册</h1>
+            <form id="myform">
+                {% csrf_token %}
+                {% for form in form_obj %}
+                    <div class="form-group">
+                        <label for="">{{ form.label }}</label>
+                        {{ form }}
+                        <span style="color: red"></span>
+                    </div>
+                {% endfor %}
+                <div class="form-group">
+                    <label for="myfile">头像
+                        {% load static %}
+                        <img src="{% static 'img/default.png' %}" id='myimg' alt="" width="100" style="margin-left: 10px">
+                    </label>
+                    <input type="file" id="myfile" name="avatar" style="display: none">
+                </div>
+                <div style="text-align: center">
+                    <input type="button" class="btn btn-primary" value="注册" id="id_commit">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $('#myfile').change(function () {
+        // 文件阅读器对象
+        // 1 先生成一个文件阅读器对象
+        let myFileReaderObj = new FileReader();
+        // 2 获取用户上传的头像文件
+        let fileobj = $(this)[0].files[0];
+        // 3 将文件对象交给阅读器对象读取
+        myFileReaderObj.readAsDataURL(fileobj) // 异步操作 io操作 所以要用到onload等待读取完成在进行
+        myFileReaderObj.onload = function(){
+        // 4 利用文件阅读器将文件展示到前端页面
+            $('#myimg').attr('src',myFileReaderObj.result);
+        }
+    })
+
+    $('#id_commit').click(function () {
+        let formDataObj = new FormData();
+        // 1 添加普通键值对
+        $.each($('#myform').serializeArray(),function (index,obj) {
+           formDataObj.append(obj.name,obj.value)
+        });
+        // 2 添加文件
+        formDataObj.append('avatar',$('#myfile')[0].files[0]);
+        $.ajax({
+            url:'',
+            type:'post',
+            data:formDataObj,
+            contentType:false,
+            processData: false,
+            success:function (args) {
+                if (args.code==1000){
+                    // 跳转到登入一面
+                    window.location.href = args.url;
+                }else{
+                    // 如何将对应的错误提示展示到对应的input框下面
+                    $.each(args.msg,function (index,obj) {
+                        let targetid = '#id_'+index;
+                        $(targetid).next().text(obj[0]).parent().addClass('has-error');
+                    });
+                }
+            }
+        })
+    })
+     // 给所有的input框绑定获取焦点事件
+    $('input').focus(function () {
+        // 将input下面的span标签和input外面的div标签修改内容及属性
+        $(this).next().text('').parent().removeClass('has-error')
+    })
+</script>
+</body>
+</html>
